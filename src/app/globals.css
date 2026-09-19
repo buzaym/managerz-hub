@@ -99,14 +99,15 @@
   .role-rotator {
     --roles: 7;
     --cycle: calc(var(--roles) * 2.4s);
-    display: inline-grid;
-    vertical-align: baseline;
+    display: grid;
+    width: 100%;
+    min-height: 1.15em;
+    overflow: hidden;
     color: var(--primary);
   }
 
   .role-rotator > span {
     grid-area: 1 / 1;
-    width: max-content;
     white-space: nowrap;
     opacity: 0;
     animation: role-cycle var(--cycle) infinite;

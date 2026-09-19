@@ -17,12 +17,15 @@ export default async function HomePage({
         heading={
           <>
             <span className="sr-only">
-              Aqui os country, business development, product e outros managers
-              se encontram para discutir ideias e colaborar.
+              Aqui é o lugar onde country, business development, product e
+              outros managers se encontram para discutir ideias e colaborar.
             </span>
-            <span aria-hidden="true">
-              Aqui os <RotatingRole /> managers se encontram para discutir
-              ideias e colaborar.
+            <span aria-hidden="true" className="flex flex-col">
+              <span>Aqui é o lugar onde</span>
+              <RotatingRole />
+              <span>
+                managers se encontram para discutir ideias e colaborar.
+              </span>
             </span>
           </>
         }

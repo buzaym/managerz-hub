@@ -53,15 +53,15 @@ export function ConversationFeed({
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="max-w-3xl space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-pretty sm:text-3xl">
+        <div className="min-w-0 w-full max-w-3xl flex-1 space-y-2">
+          <h1 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
             {heading}
           </h1>
           <p className="text-sm leading-6 text-muted-foreground sm:text-base">
             {description}
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="shrink-0">
           <Link href={currentUser ? "/nova" : "/entrar?next=/nova"}>
             {currentUser ? "Nova conversa" : "Entrar para publicar"}
           </Link>
