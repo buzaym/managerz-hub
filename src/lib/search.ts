@@ -2,6 +2,8 @@ import { categories } from "@/lib/categories"
 import type { Post, User } from "@/lib/types"
 
 export const MIN_SEARCH_CHARS = 2
+export const SUGGEST_DEBOUNCE_MS = 220
+export const SAVE_IDLE_MS = 3000
 
 export type SearchTrigger = "type" | "submit" | "suggestion"
 

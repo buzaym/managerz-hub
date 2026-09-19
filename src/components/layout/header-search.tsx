@@ -18,12 +18,15 @@ import {
   isSearchable,
   localSearchSuggestions,
   MIN_SEARCH_CHARS,
+  SAVE_IDLE_MS,
+  SUGGEST_DEBOUNCE_MS,
   normalizeSearch,
   type SearchSuggestion,
+  type SearchTrigger,
 } from "@/lib/search"
 import { cn } from "@/lib/utils"
 
-function recordSearch(query: string, trigger: "type" | "submit" | "suggestion") {
+function recordSearch(query: string, trigger: SearchTrigger) {
   void fetch("/api/search", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -37,6 +40,7 @@ export function HeaderSearch() {
   const { posts, users } = useCommunity()
   const listId = useId()
   const rootRef = useRef<HTMLFormElement>(null)
+  const skipIdleSaveRef = useRef(false)
   const [query, setQuery] = useState(searchParams.get("q") ?? "")
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(0)
@@ -73,7 +77,6 @@ export function HeaderSearch() {
 
     const controller = new AbortController()
     const timeout = window.setTimeout(async () => {
-      recordSearch(value, "type")
       try {
         const response = await fetch(
           `/api/search/suggest?q=${encodeURIComponent(value)}`,
@@ -99,12 +102,25 @@ export function HeaderSearch() {
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return
       }
-    }, 220)
+    }, SUGGEST_DEBOUNCE_MS)
 
     return () => {
       controller.abort()
       window.clearTimeout(timeout)
     }
+  }, [query])
+
+  useEffect(() => {
+    const value = query.trim()
+    if (!isSearchable(value)) return
+
+    skipIdleSaveRef.current = false
+    const timeout = window.setTimeout(() => {
+      if (skipIdleSaveRef.current) return
+      recordSearch(value, "type")
+    }, SAVE_IDLE_MS)
+
+    return () => window.clearTimeout(timeout)
   }, [query])
 
   useEffect(() => {
@@ -118,6 +134,7 @@ export function HeaderSearch() {
   function goToResults(value: string) {
     const next = value.trim()
     if (!isSearchable(next)) return
+    skipIdleSaveRef.current = true
     recordSearch(next, "submit")
     setOpen(false)
     router.push(`/?q=${encodeURIComponent(next)}`)
