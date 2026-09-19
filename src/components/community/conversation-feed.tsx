@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo } from "react"
+import { useMemo, type ReactNode } from "react"
 
 import { CategoryPills } from "@/components/community/category-pills"
 import { PostCard } from "@/components/community/post-card"
@@ -22,7 +22,7 @@ export function ConversationFeed({
   category?: CategorySlug
   query?: string
   kind?: Post["kind"]
-  heading: string
+  heading: ReactNode
   description: string
 }) {
   const { posts, answers, postVotes, currentUser } = useCommunity()
@@ -53,8 +53,8 @@ export function ConversationFeed({
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="max-w-2xl space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+        <div className="max-w-3xl space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-pretty sm:text-3xl">
             {heading}
           </h1>
           <p className="text-sm leading-6 text-muted-foreground sm:text-base">

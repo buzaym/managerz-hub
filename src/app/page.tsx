@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 
 import { ConversationFeed } from "@/components/community/conversation-feed"
+import { RotatingRole } from "@/components/community/rotating-role"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default async function HomePage({
@@ -13,8 +14,19 @@ export default async function HomePage({
     <Suspense fallback={<Skeleton className="h-64 w-full" />}>
       <ConversationFeed
         query={q}
-        heading="Gestores se conectam, votam e se ajudam."
-        description="Country managers, product managers, business development e o resto de quem lidera gente. Leia tudo. Entre para votar, responder ou abrir um hotseat."
+        heading={
+          <>
+            <span className="sr-only">
+              Aqui os country, business development, product e outros managers
+              se encontram para discutir ideias e colaborar.
+            </span>
+            <span aria-hidden="true">
+              Aqui os <RotatingRole /> managers se encontram para discutir
+              ideias e colaborar.
+            </span>
+          </>
+        }
+        description="Leia tudo. Entre para votar, responder ou abrir um hotseat."
       />
     </Suspense>
   )

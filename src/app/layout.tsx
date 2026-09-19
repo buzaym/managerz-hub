@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s · Managerz",
   },
   description:
-    "A comunidade onde country managers, product managers e business development managers se conectam, votam e se ajudam.",
+    "Aqui os country, business development, product e outros managers se encontram para discutir ideias e colaborar.",
   applicationName: "Managerz",
   keywords: [
     "gestores",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Managerz",
     description:
-      "Comunidade de gestores: conversas, upvotes, hotseats e ranking. Aberta para ler — entre para participar.",
+      "Aqui os country, business development, product e outros managers se encontram para discutir ideias e colaborar.",
     url: "https://managerz.com.br",
     siteName: "Managerz",
     locale: "pt_BR",
