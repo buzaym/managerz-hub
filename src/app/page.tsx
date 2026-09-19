@@ -20,12 +20,9 @@ export default async function HomePage({
               Aqui é o lugar onde country, business development, product e
               outros managers se encontram para discutir ideias e colaborar.
             </span>
-            <span aria-hidden="true" className="flex flex-col">
-              <span>Aqui é o lugar onde</span>
-              <RotatingRole />
-              <span>
-                managers se encontram para discutir ideias e colaborar.
-              </span>
+            <span aria-hidden="true">
+              Aqui é o lugar onde <RotatingRole /> managers se encontram para
+              discutir ideias e colaborar.
             </span>
           </>
         }
