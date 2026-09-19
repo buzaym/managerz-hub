@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCommunity } from "@/lib/community-store"
 import { unanswered, voteCount, trendingScore } from "@/lib/ranking"
+import { isSearchable, normalizeSearch } from "@/lib/search"
 import type { CategorySlug, Post } from "@/lib/types"
 
 export function ConversationFeed({
@@ -28,14 +29,14 @@ export function ConversationFeed({
   const { posts, answers, postVotes, currentUser } = useCommunity()
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
+    const q = normalizeSearch(query)
     return posts.filter((post) => {
       if (category && post.category !== category) return false
       if (kind && post.kind !== kind) return false
-      if (!q) return true
+      if (!isSearchable(q)) return true
       return (
-        post.title.toLowerCase().includes(q) ||
-        post.body.toLowerCase().includes(q)
+        normalizeSearch(post.title).includes(q) ||
+        normalizeSearch(post.body).includes(q)
       )
     })
   }, [posts, category, kind, query])
@@ -80,7 +81,7 @@ export function ConversationFeed({
         </p>
       ) : null}
 
-      {query ? (
+      {isSearchable(query) ? (
         <p className="text-sm text-muted-foreground">
           Resultados para <span className="font-medium text-foreground">“{query}”</span>
         </p>

@@ -1,15 +1,15 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { FormEvent, Suspense, useState } from "react"
-import { MenuIcon, SearchIcon } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { Suspense } from "react"
+import { MenuIcon } from "lucide-react"
 
 import { Logo } from "@/components/brand/logo"
+import { HeaderSearch } from "@/components/layout/header-search"
 import { MemberAvatar } from "@/components/people/member-avatar"
 import { UserBadges } from "@/components/community/user-badges"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   Sheet,
   SheetContent,
@@ -28,31 +28,6 @@ import { useCommunity } from "@/lib/community-store"
 import { communityNav } from "@/lib/nav"
 import { badgesForUser } from "@/lib/ranking"
 import { cn } from "@/lib/utils"
-
-function HeaderSearch() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [query, setQuery] = useState(searchParams.get("q") ?? "")
-
-  function onSubmit(event: FormEvent) {
-    event.preventDefault()
-    const value = query.trim()
-    router.push(value ? `/?q=${encodeURIComponent(value)}` : "/")
-  }
-
-  return (
-    <form onSubmit={onSubmit} className="relative min-w-0 flex-1">
-      <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-primary-foreground/60" />
-      <Input
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Buscar conversas, cargos, problemas…"
-        aria-label="Buscar conversas"
-        className="h-9 border-white/15 bg-white/10 pl-8 text-primary-foreground placeholder:text-primary-foreground/55 focus-visible:border-white/40 focus-visible:ring-white/30"
-      />
-    </form>
-  )
-}
 
 function NavLinks({
   onNavigate,

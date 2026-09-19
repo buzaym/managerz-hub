@@ -7,26 +7,28 @@ Leia tudo sem conta. Para votar, responder, abrir um problema ou um hotseat, ent
 ## O que está no ar
 
 - **Conversas** estilo fórum + Quora, com busca e categorias
+- **Busca** com sugestões a partir de 2 caracteres; cada busca é gravada no Supabase
 - **Upvotes** e tópicos **em alta**
 - **Hotseats** — você senta na cadeira, a mesa pergunta
 - **Ranking** por votos em perguntas e respostas, com badges 🏆1 🏆A 🏆H
 - **Compartilhar** pergunta e link (LinkedIn, X, copiar)
 
-Esta versão guarda dados no navegador (localStorage). Não há backend ainda.
+Conversas e votos ficam no navegador (localStorage). O histórico de buscas vai para o projeto Supabase `managerz`.
 
 ## Como rodar
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
 Abre em [http://127.0.0.1:3847](http://127.0.0.1:3847).
 
-## Domínio
+A busca sugere a partir de 2 caracteres (categorias, pessoas, conversas e histórico). Cada digitação, envio e clique em sugestão é gravado em `search_queries` no projeto Supabase `managerz`.
 
-Publique e aponte **managerz.com.br** para o host.
+`.env.local` pode copiar `.env.example`. Sem as variáveis, o app usa a URL e a chave publishable do projeto `managerz` — o histórico continua sendo gravado.
 
 ## Stack
 
-Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui.
+Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui, Supabase.
