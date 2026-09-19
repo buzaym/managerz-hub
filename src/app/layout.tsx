@@ -1,22 +1,18 @@
 import type { Metadata } from "next"
-import { Fraunces, Geist, Geist_Mono } from "next/font/google"
+import { Geist_Mono, Inter } from "next/font/google"
 
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { Providers } from "@/app/providers"
+import { SiteHeader } from "@/components/layout/site-header"
 
 import "./globals.css"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin", "latin-ext"],
 })
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin", "latin-ext"],
-})
-
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
   subsets: ["latin", "latin-ext"],
 })
 
@@ -27,21 +23,21 @@ export const metadata: Metadata = {
     template: "%s · Managerz",
   },
   description:
-    "A mesa dos gestores. Comunidade para trocar ideias, sentar no hotseat, resolver problemas, marcar conversas, participar de webinars e negociar serviços — em português, no Brasil.",
+    "A comunidade onde country managers, product managers e business development managers se conectam, votam e se ajudam.",
   applicationName: "Managerz",
   keywords: [
     "gestores",
-    "liderança",
+    "country manager",
+    "product manager",
+    "business development",
     "comunidade",
-    "hotseat",
-    "webinar",
-    "marketplace",
+    "forum",
     "Brasil",
   ],
   openGraph: {
     title: "Managerz",
     description:
-      "A comunidade de gestores do Brasil. Ideias, hotseats, problemas reais, agenda, webinars e marketplace.",
+      "Comunidade de gestores: conversas, upvotes, hotseats e ranking. Aberta para ler — entre para participar.",
     url: "https://managerz.com.br",
     siteName: "Managerz",
     locale: "pt_BR",
@@ -53,10 +49,21 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${inter.className} ${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
-        <TooltipProvider>{children}</TooltipProvider>
+      <body className="flex min-h-full flex-col bg-background">
+        <Providers>
+          <SiteHeader />
+          <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
+            {children}
+          </main>
+          <footer className="border-t border-border bg-card">
+            <div className="mx-auto flex w-full max-w-5xl flex-col gap-1 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <p>Managerz · managerz.com.br</p>
+              <p>Leia grátis. Entre para votar, responder e abrir um hotseat.</p>
+            </div>
+          </footer>
+        </Providers>
       </body>
     </html>
   )

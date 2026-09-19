@@ -14,8 +14,8 @@ export function EmptyState({
   action?: ReactNode
 }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-xl border border-dashed border-border bg-card/60 px-5 py-10">
-      <h2 className="font-heading text-xl tracking-tight">{title}</h2>
+    <div className="flex flex-col items-start gap-3 rounded-xl border border-dashed border-border bg-card px-5 py-10">
+      <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
       <p className="max-w-lg text-sm leading-6 text-muted-foreground">
         {description}
       </p>

@@ -1,6 +1,6 @@
 import { initials } from "@/lib/format"
 import { cn } from "@/lib/utils"
-import type { Member } from "@/lib/types"
+import type { User } from "@/lib/types"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export function MemberAvatar({
@@ -8,7 +8,7 @@ export function MemberAvatar({
   size = "default",
   className,
 }: {
-  member: Member
+  member: Pick<User, "name" | "accent">
   size?: "default" | "sm" | "lg"
   className?: string
 }) {
@@ -28,12 +28,12 @@ export function MemberMeta({
   member,
   className,
 }: {
-  member: Member
+  member: Pick<User, "name" | "role" | "company">
   className?: string
 }) {
   return (
     <div className={cn("min-w-0", className)}>
-      <p className="truncate font-medium text-foreground">{member.name}</p>
+      <p className="truncate text-sm font-medium text-foreground">{member.name}</p>
       <p className="truncate text-xs text-muted-foreground">
         {member.role} · {member.company}
       </p>

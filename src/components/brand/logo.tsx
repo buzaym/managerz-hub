@@ -1,25 +1,55 @@
+import Image from "next/image"
 import Link from "next/link"
 
 import { cn } from "@/lib/utils"
 
 export function Logo({
-  className,
+  variant = "white",
   href = "/",
+  className,
 }: {
-  className?: string
+  variant?: "white" | "navy"
   href?: string
+  className?: string
 }) {
+  const lockup =
+    variant === "white"
+      ? "/brand/logo-lockup-white.png"
+      : "/brand/logo-lockup-navy.png"
+  const mark =
+    variant === "white" ? "/brand/mark-white.png" : "/brand/mark-navy.png"
+
   return (
-    <Link
-      href={href}
-      className={cn("flex items-center gap-2.5 text-foreground", className)}
-    >
-      <span className="grid size-8 place-items-center rounded-md bg-primary font-heading text-lg leading-none text-primary-foreground shadow-[inset_0_-1px_0_oklch(0_0_0/0.15)]">
-        M
-      </span>
-      <span className="font-heading text-[1.35rem] leading-none tracking-tight">
-        Managerz
-      </span>
+    <Link href={href} className={cn("flex items-center", className)}>
+      <Image
+        src={lockup}
+        alt="Managerz"
+        width={196}
+        height={24}
+        className="hidden h-7 w-auto sm:block"
+        priority
+      />
+      <Image
+        src={mark}
+        alt="Managerz"
+        width={32}
+        height={32}
+        className="h-8 w-8 sm:hidden"
+        priority
+      />
     </Link>
+  )
+}
+
+export function LogoStacked({ className }: { className?: string }) {
+  return (
+    <Image
+      src="/brand/logo-white.png"
+      alt="Managerz"
+      width={280}
+      height={144}
+      className={cn("h-auto w-48 sm:w-64", className)}
+      priority
+    />
   )
 }

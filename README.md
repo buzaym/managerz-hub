@@ -1,19 +1,18 @@
 # Managerz
 
-A mesa dos gestores. Comunidade em [managerz.com.br](https://managerz.com.br) para quem lidera pessoas: troca de ideias, hotseats, resolução de problemas, agenda entre pares, webinars e um marketplace de serviços (e trocas de hora).
+A comunidade em [managerz.com.br](https://managerz.com.br) onde country managers, product managers e business development managers se conectam, votam e se ajudam.
 
-Esta versão é um primeiro recorte navegável, em português, com dados de demonstração salvos no navegador. Você entra como **Camila Ribeiro**, Head of People da Leme Pay.
+Leia tudo sem conta. Para votar, responder, abrir um problema ou um hotseat, entre.
 
-## O que já funciona
+## O que está no ar
 
-- **Mesa** — pulso da comunidade, hotseat ao vivo e atalhos
-- **Ideias** — publicar, votar e responder
-- **Hotseats** — confirmar presença e fazer perguntas
-- **Problemas** — trazer um caso, responder, marcar o que ajudou
-- **Agenda** — marcar 1:1 entre pares (horário de Brasília)
-- **Webinars** — inscrever-se nas sessões
-- **Marketplace** — anunciar serviço ou troca, enviar pedido
-- **Membros** — círculo inicial e restauração dos dados de demo
+- **Conversas** estilo fórum + Quora, com busca e categorias
+- **Upvotes** e tópicos **em alta**
+- **Hotseats** — você senta na cadeira, a mesa pergunta
+- **Ranking** por votos em perguntas e respostas, com badges 🏆1 🏆A 🏆H
+- **Compartilhar** pergunta e link (LinkedIn, X, copiar)
+
+Esta versão guarda dados no navegador (localStorage). Não há backend ainda.
 
 ## Como rodar
 
@@ -24,15 +23,10 @@ npm run dev
 
 Abre em [http://127.0.0.1:4317](http://127.0.0.1:4317).
 
-```bash
-npm run build
-npm start
-```
-
 ## Domínio
 
-O produto aponta para **managerz.com.br**. Configure o domínio no provedor de hospedagem (por exemplo Vercel) quando for publicar.
+Publique e aponte **managerz.com.br** para o host.
 
 ## Stack
 
-Next.js (App Router), TypeScript, Tailwind CSS e shadcn/ui.
+Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui.

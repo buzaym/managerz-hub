@@ -9,60 +9,40 @@ import {
   type ReactNode,
 } from "react"
 
-import { currentUserId, seedState } from "@/lib/seed"
+import { seedState } from "@/lib/seed"
 import type {
+  Answer,
+  CategorySlug,
   CommunityState,
-  HotseatQuestion,
-  Idea,
-  Inquiry,
-  Listing,
-  ListingKind,
-  Meeting,
-  Problem,
-  ProblemStatus,
-  Reply,
-  Solution,
+  Post,
+  PostKind,
+  User,
 } from "@/lib/types"
 
-const STORAGE_KEY = "managerz-community-v1"
+const STORAGE_KEY = "managerz-forum-v1"
 
 type CommunityContextValue = CommunityState & {
-  ready: boolean
-  currentUserId: string
-  addIdea: (input: { title: string; body: string; tags: string[] }) => string
-  addReply: (ideaId: string, body: string) => void
-  toggleIdeaVote: (ideaId: string) => void
-  toggleRsvp: (eventId: string) => void
-  addHotseatQuestion: (hotseatId: string, text: string) => void
-  toggleQuestionVote: (questionId: string) => void
-  addProblem: (input: {
-    title: string
-    body: string
-    context: string
-    tags: string[]
-  }) => string
-  setProblemStatus: (problemId: string, status: ProblemStatus) => void
-  addSolution: (problemId: string, body: string) => void
-  toggleSolutionHelpful: (solutionId: string) => void
-  addMeeting: (input: {
-    title: string
-    guestIds: string[]
-    startsAt: string
-    durationMin: number
-    place: string
-    notes: string
-  }) => string
-  addListing: (input: {
-    kind: ListingKind
-    title: string
-    description: string
-    category: string
-    priceCents: number | null
-    tradeFor: string | null
+  currentUser: User | null
+  login: (email: string) => boolean
+  signup: (input: {
+    name: string
+    email: string
+    role: string
+    company: string
     city: string
   }) => string
-  addInquiry: (listingId: string, message: string) => void
-  resetDemo: () => void
+  logout: () => void
+  loginAs: (userId: string) => void
+  togglePostVote: (postId: string) => "ok" | "auth"
+  toggleAnswerVote: (answerId: string) => "ok" | "auth"
+  addPost: (input: {
+    kind: PostKind
+    title: string
+    body: string
+    category: CategorySlug
+    startsAt?: string
+  }) => string | "auth"
+  addAnswer: (postId: string, body: string) => "ok" | "auth"
 }
 
 const CommunityContext = createContext<CommunityContextValue | null>(null)
@@ -90,7 +70,13 @@ function ensureLoaded() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
-      memory = { ...cloneSeed(), ...JSON.parse(raw) }
+      const parsed = JSON.parse(raw) as CommunityState
+      memory = {
+        ...cloneSeed(),
+        ...parsed,
+        postVotes: { ...cloneSeed().postVotes, ...parsed.postVotes },
+        answerVotes: { ...cloneSeed().answerVotes, ...parsed.answerVotes },
+      }
     }
   } catch {
     memory = cloneSeed()
@@ -118,283 +104,165 @@ function mutate(updater: (current: CommunityState) => CommunityState) {
   emit()
 }
 
+function toggleVoteMap(
+  map: Record<string, string[]>,
+  id: string,
+  userId: string,
+) {
+  const current = map[id] ?? []
+  const next = current.includes(userId)
+    ? current.filter((item) => item !== userId)
+    : [...current, userId]
+  return { ...map, [id]: next }
+}
+
 export function CommunityProvider({ children }: { children: ReactNode }) {
   const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+  const currentUser =
+    state.users.find((user) => user.id === state.sessionUserId) ?? null
 
-  const addIdea = useCallback(
-    ({ title, body, tags }: { title: string; body: string; tags: string[] }) => {
-      const id = `idea-${crypto.randomUUID()}`
-      const idea: Idea = {
-        id,
-        authorId: currentUserId,
-        title,
-        body,
-        tags,
-        votes: 1,
-        createdAt: new Date().toISOString(),
-      }
-      mutate((current) => ({
-        ...current,
-        ideas: [idea, ...current.ideas],
-        ideaVotes: [...current.ideaVotes, id],
-      }))
-      return id
-    },
-    [],
-  )
-
-  const addReply = useCallback((ideaId: string, body: string) => {
-    const reply: Reply = {
-      id: `reply-${crypto.randomUUID()}`,
-      ideaId,
-      authorId: currentUserId,
-      body,
-      createdAt: new Date().toISOString(),
-    }
-    mutate((current) => ({ ...current, replies: [...current.replies, reply] }))
+  const login = useCallback((email: string) => {
+    const match = memory.users.find(
+      (user) => user.email.toLowerCase() === email.trim().toLowerCase(),
+    )
+    if (!match) return false
+    mutate((current) => ({ ...current, sessionUserId: match.id }))
+    return true
   }, [])
 
-  const toggleIdeaVote = useCallback((ideaId: string) => {
-    mutate((current) => {
-      const voted = current.ideaVotes.includes(ideaId)
-      return {
-        ...current,
-        ideaVotes: voted
-          ? current.ideaVotes.filter((id) => id !== ideaId)
-          : [...current.ideaVotes, ideaId],
-        ideas: current.ideas.map((idea) =>
-          idea.id === ideaId
-            ? { ...idea, votes: idea.votes + (voted ? -1 : 1) }
-            : idea,
-        ),
-      }
-    })
-  }, [])
-
-  const toggleRsvp = useCallback((eventId: string) => {
-    mutate((current) => ({
-      ...current,
-      rsvps: current.rsvps.includes(eventId)
-        ? current.rsvps.filter((id) => id !== eventId)
-        : [...current.rsvps, eventId],
-    }))
-  }, [])
-
-  const addHotseatQuestion = useCallback((hotseatId: string, text: string) => {
-    const question: HotseatQuestion = {
-      id: `q-${crypto.randomUUID()}`,
-      hotseatId,
-      authorId: currentUserId,
-      text,
-      votes: 1,
-      createdAt: new Date().toISOString(),
-    }
-    mutate((current) => ({
-      ...current,
-      questions: [question, ...current.questions],
-      questionVotes: [...current.questionVotes, question.id],
-    }))
-  }, [])
-
-  const toggleQuestionVote = useCallback((questionId: string) => {
-    mutate((current) => {
-      const voted = current.questionVotes.includes(questionId)
-      return {
-        ...current,
-        questionVotes: voted
-          ? current.questionVotes.filter((id) => id !== questionId)
-          : [...current.questionVotes, questionId],
-        questions: current.questions.map((question) =>
-          question.id === questionId
-            ? { ...question, votes: question.votes + (voted ? -1 : 1) }
-            : question,
-        ),
-      }
-    })
-  }, [])
-
-  const addProblem = useCallback(
-    ({
-      title,
-      body,
-      context,
-      tags,
-    }: {
-      title: string
-      body: string
-      context: string
-      tags: string[]
-    }) => {
-      const id = `pb-${crypto.randomUUID()}`
-      const problem: Problem = {
-        id,
-        authorId: currentUserId,
-        title,
-        body,
-        context,
-        tags,
-        status: "open",
-        createdAt: new Date().toISOString(),
-      }
-      mutate((current) => ({
-        ...current,
-        problems: [problem, ...current.problems],
-      }))
-      return id
-    },
-    [],
-  )
-
-  const setProblemStatus = useCallback(
-    (problemId: string, status: ProblemStatus) => {
-      mutate((current) => ({
-        ...current,
-        problems: current.problems.map((problem) =>
-          problem.id === problemId ? { ...problem, status } : problem,
-        ),
-      }))
-    },
-    [],
-  )
-
-  const addSolution = useCallback((problemId: string, body: string) => {
-    const solution: Solution = {
-      id: `sol-${crypto.randomUUID()}`,
-      problemId,
-      authorId: currentUserId,
-      body,
-      helpful: 0,
-      createdAt: new Date().toISOString(),
-    }
-    mutate((current) => ({
-      ...current,
-      solutions: [...current.solutions, solution],
-    }))
-  }, [])
-
-  const toggleSolutionHelpful = useCallback((solutionId: string) => {
-    mutate((current) => {
-      const voted = current.solutionVotes.includes(solutionId)
-      return {
-        ...current,
-        solutionVotes: voted
-          ? current.solutionVotes.filter((id) => id !== solutionId)
-          : [...current.solutionVotes, solutionId],
-        solutions: current.solutions.map((solution) =>
-          solution.id === solutionId
-            ? { ...solution, helpful: solution.helpful + (voted ? -1 : 1) }
-            : solution,
-        ),
-      }
-    })
-  }, [])
-
-  const addMeeting = useCallback(
+  const signup = useCallback(
     (input: {
-      title: string
-      guestIds: string[]
-      startsAt: string
-      durationMin: number
-      place: string
-      notes: string
-    }) => {
-      const id = `mt-${crypto.randomUUID()}`
-      const meeting: Meeting = {
-        id,
-        hostId: currentUserId,
-        ...input,
-      }
-      mutate((current) => ({
-        ...current,
-        meetings: [...current.meetings, meeting],
-      }))
-      return id
-    },
-    [],
-  )
-
-  const addListing = useCallback(
-    (input: {
-      kind: ListingKind
-      title: string
-      description: string
-      category: string
-      priceCents: number | null
-      tradeFor: string | null
+      name: string
+      email: string
+      role: string
+      company: string
       city: string
     }) => {
-      const id = `ls-${crypto.randomUUID()}`
-      const listing: Listing = {
+      const existing = memory.users.find(
+        (user) => user.email.toLowerCase() === input.email.trim().toLowerCase(),
+      )
+      if (existing) {
+        mutate((current) => ({ ...current, sessionUserId: existing.id }))
+        return existing.id
+      }
+      const id = `u-${crypto.randomUUID()}`
+      const user: User = {
         id,
-        authorId: currentUserId,
-        createdAt: new Date().toISOString(),
-        ...input,
+        name: input.name.trim(),
+        email: input.email.trim().toLowerCase(),
+        role: input.role.trim() || "Gestor",
+        company: input.company.trim() || "Independente",
+        city: input.city.trim() || "Brasil",
+        bio: "Acabou de entrar na Managerz.",
+        accent: "oklch(0.45 0.08 250)",
       }
       mutate((current) => ({
         ...current,
-        listings: [listing, ...current.listings],
+        users: [user, ...current.users],
+        sessionUserId: id,
       }))
       return id
     },
     [],
   )
 
-  const addInquiry = useCallback((listingId: string, message: string) => {
-    const inquiry: Inquiry = {
-      id: `inq-${crypto.randomUUID()}`,
-      listingId,
-      authorId: currentUserId,
-      message,
+  const logout = useCallback(() => {
+    mutate((current) => ({ ...current, sessionUserId: null }))
+  }, [])
+
+  const loginAs = useCallback((userId: string) => {
+    mutate((current) => ({ ...current, sessionUserId: userId }))
+  }, [])
+
+  const togglePostVote = useCallback((postId: string) => {
+    const userId = memory.sessionUserId
+    if (!userId) return "auth"
+    mutate((current) => ({
+      ...current,
+      postVotes: toggleVoteMap(current.postVotes, postId, userId),
+    }))
+    return "ok"
+  }, [])
+
+  const toggleAnswerVote = useCallback((answerId: string) => {
+    const userId = memory.sessionUserId
+    if (!userId) return "auth"
+    mutate((current) => ({
+      ...current,
+      answerVotes: toggleVoteMap(current.answerVotes, answerId, userId),
+    }))
+    return "ok"
+  }, [])
+
+  const addPost = useCallback(
+    (input: {
+      kind: PostKind
+      title: string
+      body: string
+      category: CategorySlug
+      startsAt?: string
+    }) => {
+      const userId = memory.sessionUserId
+      if (!userId) return "auth"
+      const id = `${input.kind === "hotseat" ? "hs" : "q"}-${crypto.randomUUID()}`
+      const post: Post = {
+        id,
+        authorId: userId,
+        createdAt: new Date().toISOString(),
+        ...input,
+      }
+      mutate((current) => ({
+        ...current,
+        posts: [post, ...current.posts],
+        postVotes: { ...current.postVotes, [id]: [userId] },
+      }))
+      return id
+    },
+    [],
+  )
+
+  const addAnswer = useCallback((postId: string, body: string) => {
+    const userId = memory.sessionUserId
+    if (!userId) return "auth"
+    const answer: Answer = {
+      id: `a-${crypto.randomUUID()}`,
+      postId,
+      authorId: userId,
+      body,
       createdAt: new Date().toISOString(),
     }
     mutate((current) => ({
       ...current,
-      inquiries: [...current.inquiries, inquiry],
+      answers: [...current.answers, answer],
+      answerVotes: { ...current.answerVotes, [answer.id]: [] },
     }))
-  }, [])
-
-  const resetDemo = useCallback(() => {
-    memory = cloneSeed()
-    persist()
-    emit()
+    return "ok"
   }, [])
 
   const value = useMemo<CommunityContextValue>(
     () => ({
       ...state,
-      ready: true,
-      currentUserId,
-      addIdea,
-      addReply,
-      toggleIdeaVote,
-      toggleRsvp,
-      addHotseatQuestion,
-      toggleQuestionVote,
-      addProblem,
-      setProblemStatus,
-      addSolution,
-      toggleSolutionHelpful,
-      addMeeting,
-      addListing,
-      addInquiry,
-      resetDemo,
+      currentUser,
+      login,
+      signup,
+      logout,
+      loginAs,
+      togglePostVote,
+      toggleAnswerVote,
+      addPost,
+      addAnswer,
     }),
     [
       state,
-      addIdea,
-      addReply,
-      toggleIdeaVote,
-      toggleRsvp,
-      addHotseatQuestion,
-      toggleQuestionVote,
-      addProblem,
-      setProblemStatus,
-      addSolution,
-      toggleSolutionHelpful,
-      addMeeting,
-      addListing,
-      addInquiry,
-      resetDemo,
+      currentUser,
+      login,
+      signup,
+      logout,
+      loginAs,
+      togglePostVote,
+      toggleAnswerVote,
+      addPost,
+      addAnswer,
     ],
   )
 
