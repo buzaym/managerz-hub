@@ -21,7 +21,7 @@ npm install
 npm run dev
 ```
 
-Abre em [http://127.0.0.1:4317](http://127.0.0.1:4317).
+Abre em [http://127.0.0.1:3847](http://127.0.0.1:3847).
 
 ## Domínio
 
